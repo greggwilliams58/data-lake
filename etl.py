@@ -14,27 +14,35 @@ os.environ['AWS_ACCESS_KEY_ID']        =config['AWS']['AWS_ACCESS_KEY_ID']
 os.environ['AWS_SECRET_ACCESS_KEY']    =config['AWS']['AWS_SECRET_ACCESS_KEY']
 
 
+#def create_spark_session():
+#    spark = SparkSession \
+#        .builder \
+#        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.0") \
+#        .getOrCreate()
+#    print("spark session created")
+#    return spark
 
 def create_spark_session():
     spark = SparkSession \
-        .builder \
-        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.0") \
-        .config("spark.hadoop.fs.s3a.awsAccessKeyId", os.environ['AWS_ACCESS_KEY_ID']) \
-        .config("spark.hadoop.fs.s3a.awsSecretAccessKey", os.environ['AWS_SECRET_ACCESS_KEY']) \
-        .getOrCreate()
+    .builder \
+    .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.0") \
+    .config("spark.hadoop.fs.s3a.impl","org.apache.hadoop.fs.s3a.S3AFileSystem") \
+    .config("spark.hadoop.fs.s3a.awsAccessKeyId", os.environ['AWS_ACCESS_KEY_ID']) \
+    .config("spark.hadoop.fs.s3a.awsSecretAccessKey", os.environ['AWS_SECRET_ACCESS_KEY']) \
+    .getOrCreate()
     print("spark session created")
     return spark
 
 
 def process_song_data(spark, input_data, output_data):
     # get filepath to song data file
-    song_data = input_data + "song_data/*/*/*/*.json"
+    song_data = input_data +"song_data/*/*/*/*.json"
+                             
     print(song_data)
     # read song data file
     print("reading in song data")
-    #df = spark.read.json(song_data)
-    df = spark.read.format("json").load(song_data)
-    
+    df = spark.read.json(song_data)
+        
     # extract columns to create songs table
     df.createOrReplaceTempView("songs_table_df")
     
