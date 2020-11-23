@@ -13,7 +13,8 @@ config.read('dl.cfg')
 os.environ['AWS_ACCESS_KEY_ID']        =config['AWS']['AWS_ACCESS_KEY_ID']
 os.environ['AWS_SECRET_ACCESS_KEY']    =config['AWS']['AWS_SECRET_ACCESS_KEY']
 
-
+print(os.environ['AWS_ACCESS_KEY_ID'] )
+print(os.environ['AWS_SECRET_ACCESS_KEY'] )
 #def create_spark_session():
 #    spark = SparkSession \
 #        .builder \
@@ -80,7 +81,7 @@ def process_song_data(spark, input_data, output_data):
 
 def process_log_data(spark, input_data, output_data):
     # get filepath to log data file
-    log_data = input_data + "log_data/*/*/*/*.json"
+    log_data = input_data + "log_data/*.json"
     
     print("reading in log data")
     # read log data file
