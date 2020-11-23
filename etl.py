@@ -6,7 +6,7 @@ from pyspark.sql.functions import udf, col, monotonically_increasing_id
 from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, date_format
 from pyspark.sql import types as t
 
-
+# reading in the AWS config information from the dl.cfg file
 config = configparser.ConfigParser()
 config.read('dl.cfg')
 
@@ -24,6 +24,16 @@ print(os.environ['AWS_SECRET_ACCESS_KEY'] )
 #    return spark
 
 def create_spark_session():
+    """
+    This creates a Spark session, specifying the hadoop package to use, the S3 buckets and reads in the AWS ID and key as 
+    environment variables
+    
+    Parameters:
+    None
+    
+    Returns:
+    Spark session object
+    """
     spark = SparkSession \
     .builder \
     .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.0") \
@@ -36,6 +46,19 @@ def create_spark_session():
 
 
 def process_song_data(spark, input_data, output_data):
+    """
+    This reads in song and artist data as csv files from the udacity s3 bucket as a spark dataframe
+    and then uses spark_sql to insert select columns into a parquet file format back into the user-generated S3 bucket
+    
+    Parameters:
+    spark:         A spark session object
+    input_data:    A string representing the udacity-generated s3 bucket root
+    output_data:   A string representing the user-generated s3 bucket root
+    
+    Output:
+    No output returned: but two parquet files written to user-generated s3 bucket
+    
+    """
     # get filepath to song data file
     song_data = input_data +"song_data/*/*/*/*.json"
                              
@@ -80,6 +103,22 @@ def process_song_data(spark, input_data, output_data):
 
 
 def process_log_data(spark, input_data, output_data):
+    """
+    This reads in log_data from the udacity-generated s3 bucket, where the data relates to songs played, and this is written to a parquet file.
+    It then takes a subset of the log_data, creates time- and date- stamps by using a udf with lambdas, and this is written to a parquet file.
+    Song data is then read into a data frame and joined with log data to create a joined table, which is written to a parquet file.
+    
+    Parameters:
+    spark:         A spark session object
+    input_data:    A string representing the udacity-generated s3 bucket root
+    output_data:   A string representing the user-generated s3 bucket root
+    
+    Returns:
+    users_table:   A spark dataframe holding user information
+    time_table:    A spark dataframe holding time information
+    songplays_table: A spark dataframe holding songplay information
+    """
+    
     # get filepath to log data file
     log_data = input_data + "log_data/*.json"
     
@@ -169,6 +208,11 @@ def process_log_data(spark, input_data, output_data):
 
 
 def main():
+    """
+    Main function for the code.
+    It creates a spark session, defines the paths of the input and ouput buckets, and call the two functions
+    process_song_data and process_log_data
+    """
     spark = create_spark_session()
     input_data = "s3a://udacity-dend/"
     output_data = "s3a://udacity-lake/output_data/"
